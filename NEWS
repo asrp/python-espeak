@@ -1,0 +1,31 @@
+2013-12-28: Version 0.5
+-----------------------
+
+ - Added support for Python 3.
+ - Minor fixes (eg. compiler warnings).
+
+2012-01-01: Version 0.4
+-----------------------
+
+ - Fixed invalid pointer dereference in list_voices (LP: #889901).
+ - Fixed a possible deadlock.
+
+2011-02-20: Version 0.3
+-----------------------
+
+ - Fixed set_voice (parameters were being parsed incorrectly).
+
+2011-01-23: Version 0.2
+-----------------------
+
+ - Fixed a memory allocation bug in synth() which resulted in weird stuff
+   being spoken out (LP: #580781).
+ - Exposed the SSML, phonemes, endpause and user_data options in synth().
+ - Wrapped all Parameter constants into a class.
+ - Added classes with constant definitions for Punctuation and Gender.
+ - Made the 'relative' argument of set_parameter() optional.
+
+2010-01-24: Version 0.1
+-----------------------
+
+Initial release.
