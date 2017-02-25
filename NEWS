@@ -1,3 +1,17 @@
+2017-02-25: Version 0.6
+-----------------------
+
+Addded
+
+ - File output instead of only playback (`espeak.init(playing=False)`).
+ - Support for multiple instances of speakers (the `espeak.Espeak` class). They have to take turns and *not* simultaneously speak.
+ - Support for multiple callbacks (`espeak.add_callback`).
+ - Wave file content sent through callbacks (for `playing=False` only since this is how the C library works).
+ - Optional start and end position for synthesis.
+ - Slightly more uniform bindings in some places (`espeak.const`).
+
+The API is however significantly changed and not backwards compatible.
+
 2013-12-28: Version 0.5
 -----------------------
 
