@@ -21,7 +21,6 @@
 from . import core
 from .core import set_voice, synth, init, list_voices
 from .core import stop as pause, playing
-from copy import copy
 import time
 import atexit
 import struct
@@ -115,7 +114,8 @@ def wave_header(init_length = 0x7ffff000, num_frames = None, num_channels = 1,
 
 class Espeak(object):
     def __init__(self):
-        self.__dict__["param"] = copy(default)
+        self.__dict__["param"] = default.copy()
+        self.voice = {"language": "en"}
 
     def add_callback(self, callback):
         add_callback(callback, self)
@@ -128,10 +128,18 @@ class Espeak(object):
         set_speaker(self)
         for key, value in self.param.items():
             set_parameter(key, value)
+        set_voice(**self.voice)
         self.synth(*args, **kwargs)
 
     def playing(self):
         return (self == current_speaker and playing())
+
+    def set_voice(self, **kwargs):
+        """ Use this function to trigger immediate change.
+        Otherwise, use self.voice[param] = value"""
+        self.voice.update(kwargs)
+        if self == current_speaker:
+            set_voice(**self.voice)
 
     def __getattr__(self, key):
         if key in funcmap:
