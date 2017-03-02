@@ -34,8 +34,6 @@ def set_wave_filename(new_filename):
     _wave_filename = new_filename
     core.set_wave_filename(_wave_filename)
 
-wave_filename = property(get_wave_filename, set_wave_filename)
-
 set_wave_filename("/tmp/espeak-wave")
 
 const = {"gender": {"unknown": 0, "male": 1, "female": 2}}
@@ -66,12 +64,16 @@ def set_parameter(key, value):
 current_speaker = None
 callbacks = {None: []}
 def all_callbacks(event_type, position, length, num_samples, name):
-    if num_samples:
-        wave_string = open(FIFO).read()
-    else:
-        wave_string = ""
-    for callback in callbacks.get(current_speaker, [])[:]:
-        callback(wave_string, event_type, position, length, num_samples, name)
+    try:
+        if num_samples:
+            wave_string = open(_wave_filename, "rb").read()
+        else:
+            wave_string = b""
+        for callback in callbacks.get(current_speaker, [])[:]:
+            callback(wave_string, event_type, position, length, num_samples, name)
+    except Exception as e:
+        import traceback
+        print(traceback.print_exc())
     return True
 
 def add_callback(callback, speaker = None):
@@ -103,13 +105,13 @@ def wave_header(init_length = 0x7ffff000, num_frames = None, num_channels = 1,
     # Not sure why 0x7ffff000 is the default for speak and espeak
     # Maybe an arbitrary large number would do
     datalength = num_frames * num_channels * sample_width if num_frames else init_length
-    header = struct.pack('<4sL4s4sLHHLLHH4sL',
-                         'RIFF', 36 + datalength, 'WAVE', 'fmt ', 16,
+    header = struct.pack(b'<4sL4s4sLHHLLHH4sL',
+                         b'RIFF', 36 + datalength, b'WAVE', b'fmt ', 16,
                          WAVE_FORMAT_PCM, num_channels, framerate,
                          num_channels * framerate * sample_width,
                          num_channels * sample_width,
                          sample_width * 8,
-                         'data', datalength)
+                         b'data', datalength)
     return header
 
 class Espeak(object):
