@@ -230,14 +230,14 @@ pyespeak_playing(PyObject *self, PyObject *args)
 static PyObject *
 pyespeak_stop(PyObject *self, PyObject *args)
 {
-	Stopping = 1;
+    Stopping = 1;
     // We need to release the GIL to avoid a deadlock with PyGILState_Ensure.
-	PyThreadState* ts = PyEval_SaveThread();
+    PyThreadState* ts = PyEval_SaveThread();
     while (AsyncPython)
         usleep(100);
-	espeak_Cancel();
-	PyEval_RestoreThread(ts);
-	Stopping = 0;
+    espeak_Cancel();
+    PyEval_RestoreThread(ts);
+    Stopping = 0;
 	
     Py_RETURN_NONE;
 }

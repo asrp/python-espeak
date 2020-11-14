@@ -169,6 +169,7 @@ atexit.register(unload_module)
 
 
 if __name__ == "__main__":
+    core.init()
     esp = Espeak()
     esp.rate = 300
     print("Rate set to %s" % esp.rate)
