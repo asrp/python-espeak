@@ -160,16 +160,17 @@ class Espeak(object):
             object.__setattr__(self, key, value)
 
 def unload_module():
-    core.init()  # Segfaults if core is never initialized
+    # Need to troubleshoot why this is needed to avoid a segfault
+    # Segfault only happens in py3, not py2!
+    global callbacks
+    del callbacks
 
 atexit.register(unload_module)
 
 # Uncomment to automatically initialize on import
 # core.init()
 
-
 if __name__ == "__main__":
-    core.init()
     esp = Espeak()
     esp.rate = 300
     print("Rate set to %s" % esp.rate)

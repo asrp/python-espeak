@@ -21,6 +21,7 @@
 
 #include <Python.h>
 #include <espeak/speak_lib.h>
+// #include <espeak-ng/speak_lib.h>
 
 #if PY_MAJOR_VERSION < 3
 	#define PyLong_FromLong PyInt_FromLong
@@ -31,6 +32,7 @@ static PyObject *BufferFullError;
 static PyObject *CallBack = NULL;
 static volatile int Stopping = 0;
 static volatile int AsyncPython = 0;
+bool initialized = false;
 
 const char* wave_filename = NULL;
 static PyObject* wave_filename_obj = NULL;
@@ -50,9 +52,7 @@ DoCallback(short* wave, espeak_EVENT_TYPE event, int pos, int len, int num_sampl
 	if (result != NULL) {
 		isTrue = PyObject_IsTrue(result);
 		Py_DECREF(result);
-	}/* else {
-	    printf("Call failed!\n");
-	}*/
+	}
 	
 	return isTrue;
 }
@@ -69,7 +69,7 @@ PyEspeakCB(short* wave, int num_samples, espeak_EVENT* event)
 			PyGILState_STATE gs = PyGILState_Ensure();
 			const char *name = NULL;
 			if (event->type == espeakEVENT_MARK || event->type == espeakEVENT_PLAY) {
-              name = (event->id).name;
+                          name = (event->id).name;
 			} else if (event->type == espeakEVENT_SAMPLERATE){
 			  char str[15];
 			  sprintf(str, "%d", event->id.number);
@@ -96,6 +96,7 @@ PyEspeakCB(short* wave, int num_samples, espeak_EVENT* event)
 
 static PyObject *
 pyespeak_initialize(PyObject *self, PyObject *args, PyObject *kwdict) {
+	initialized = true;
 	int synchronous = 0;
 	int playback = 1;
 	int buffer_length = 400;
@@ -131,12 +132,12 @@ pyespeak_initialize(PyObject *self, PyObject *args, PyObject *kwdict) {
 
 static void
 pyespeak_finalize() {
-    //Segfaults if CallBack is an instance method instead of a function.
-	if (CallBack != NULL)
-		Py_CLEAR(CallBack);
+	// Segfaults sometimes. Not sure why. However, _not_ clearing this seems to
+	// cause no obvious issue.
+	// Py_CLEAR(CallBack);
 	if (wave_filename_obj != NULL)
 		Py_CLEAR(wave_filename_obj);
-	espeak_Terminate();
+        if (initialized) espeak_Terminate();
 }
 
 static PyObject *
@@ -230,14 +231,14 @@ pyespeak_playing(PyObject *self, PyObject *args)
 static PyObject *
 pyespeak_stop(PyObject *self, PyObject *args)
 {
-    Stopping = 1;
+	Stopping = 1;
     // We need to release the GIL to avoid a deadlock with PyGILState_Ensure.
-    PyThreadState* ts = PyEval_SaveThread();
+	PyThreadState* ts = PyEval_SaveThread();
     while (AsyncPython)
         usleep(100);
-    espeak_Cancel();
-    PyEval_RestoreThread(ts);
-    Stopping = 0;
+	espeak_Cancel();
+	PyEval_RestoreThread(ts);
+	Stopping = 0;
 	
     Py_RETURN_NONE;
 }

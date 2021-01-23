@@ -6,7 +6,7 @@ module = Extension('espeak.core',
 
 setup(
     name = 'python-espeak',
-    version = '0.6.2',
+    version = '0.6.3',
     description = 'Python C extension for the eSpeak speech synthesizer',
     author = 'Siegfried-A. Gevatter Pujals, asrp',
     author_email = 'asrp@email.com',
